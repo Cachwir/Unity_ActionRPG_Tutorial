@@ -28,34 +28,32 @@ public class NPCMovementManager : AutoMoving
         }
     }
 
-    protected new void Update()
-    {
-        base.Update();
-    }
-
     // moves only if there's a walk area and if the NPC isn't trying to leave that walk area
-    protected override bool AdditionalMovingConditions()
+    public override bool ValidateMoveDirection(Vector3 velocity)
     {
         if (IsMoving)
         {
-            if (IsTryingToLeaveWalkArea())
+            if (IsTryingToLeaveWalkArea(velocity))
             {
                 StartWait();
             }
         }
 
-        return base.AdditionalMovingConditions()
-            && hasWalkArea
-            && !IsTryingToLeaveWalkArea()
+        return base.ValidateMoveDirection(velocity)
+            && !hasWalkArea
+            || (
+                hasWalkArea
+                && !IsTryingToLeaveWalkArea(velocity)
+                )
             ;
     }
 
-    protected bool IsTryingToLeaveWalkArea()
+    protected bool IsTryingToLeaveWalkArea(Vector3 velocity)
     {
-        return (MoveInput.x > 0 && transform.position.x > maxWalkPoint.x)
-            || (MoveInput.y > 0 && transform.position.y > maxWalkPoint.y)
-            || (MoveInput.x < 0 && transform.position.x < minWalkPoint.x)
-            || (MoveInput.y < 0 && transform.position.y < minWalkPoint.y)
+        return (velocity.x > 0 && transform.position.x > maxWalkPoint.x)
+            || (velocity.y > 0 && transform.position.y > maxWalkPoint.y)
+            || (velocity.x < 0 && transform.position.x < minWalkPoint.x)
+            || (velocity.y < 0 && transform.position.y < minWalkPoint.y)
             ;
     }
 }

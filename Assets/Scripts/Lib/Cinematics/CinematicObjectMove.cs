@@ -27,22 +27,17 @@ public class CinematicObjectMove : MonoBehaviour {
     protected bool isMoving;
     protected float moveStartFixedTime;
     public bool HasFinishedMoving { get; set; }
-    protected MovableCinematicObjectController movableCinematicObjectController;
+    protected Movable thisMovable;
+    protected string moveId;
 
     // Use this for initialization
     void Awake()
     {
-        // If the moved GameObject is animated, we assume it is of Movable class
-        if (GetComponent<Movable>() != null)
-        {
-            // Let's attach the CinematicMovableObjectController to it
-            gameObject.AddComponent<MovableCinematicObjectController>();
-            movableCinematicObjectController = GetComponent<MovableCinematicObjectController>();
-        }
+        thisMovable = GetComponent<Movable>();
     }
-	
-	// Update is called once per frame
-	void Update ()
+
+    // Update is called once per frame
+    void Update ()
     {
 
     }
@@ -50,6 +45,27 @@ public class CinematicObjectMove : MonoBehaviour {
     void FixedUpdate()
     {
         HandleMovesOnUpdate();
+    }
+
+    protected void SetMove(Vector3 move)
+    {
+        if (thisMovable == null)
+        {
+            gameObject.transform.position = move;
+        }
+        else
+        {
+            move = Helper.MoveToVelocity(move, gameObject);
+            moveId = thisMovable.MoveCompiler.AddOrEditMoveFactor(Helper.GetObjectLocalIdInFile(this), move, moveId, true, true);
+        }
+    }
+
+    protected void RemoveMove()
+    {
+        if (thisMovable != null)
+        {
+            thisMovable.MoveCompiler.RemoveMoveFactor(Helper.GetObjectLocalIdInFile(this), moveId);
+        }
     }
 
     public void HandleMovesOnUpdate()
@@ -62,33 +78,22 @@ public class CinematicObjectMove : MonoBehaviour {
             {
                 if (moveType == MoveType.LERP)
                 {
-                    transform.position = Vector3.Lerp(transform.position, targetDestination.transform.position, step);
+                    SetMove(Vector3.Lerp(transform.position, targetDestination.transform.position, step));
                 }
                 else if (moveType == MoveType.LINEAR)
                 {
-                    transform.position = Vector3.MoveTowards(transform.position, targetDestination.transform.position, step);
+                    SetMove(Vector3.MoveTowards(transform.position, targetDestination.transform.position, step));
                 }
                 else if (moveType == MoveType.EASEINOUT)
                 {
-                    transform.position = Vector3.Lerp(transform.position, targetDestination.transform.position, Mathf.SmoothStep(0.0f, 1.0f, Mathf.SmoothStep(0.0f, 1.0f, Time.fixedTime - moveStartFixedTime)) * (moveSpeed / 10));
-                }
-
-                if (movableCinematicObjectController != null)
-                {
-                    // Gets a vector that points from the cinematic object's position to the target's.
-                    movableCinematicObjectController.HeadingDirection = targetDestination.transform.position - transform.position;
+                    SetMove(Vector3.Lerp(transform.position, targetDestination.transform.position, Mathf.SmoothStep(0.0f, 1.0f, Mathf.SmoothStep(0.0f, 1.0f, Time.fixedTime - moveStartFixedTime)) * (moveSpeed / 10)));
                 }
             }
             else
             {
                 HasFinishedMoving = true;
-
-                if (movableCinematicObjectController != null)
-                {
-                    movableCinematicObjectController.StopAnimatingMoves();
-                    Destroy(movableCinematicObjectController);
-                }
-
+                RemoveMove();
+                
                 afterMoveCallback();
             }
         }
@@ -108,12 +113,6 @@ public class CinematicObjectMove : MonoBehaviour {
         else
         {
             targetDestinationPosition = new Vector3(targetDestination.transform.position.x, targetDestination.transform.position.y, targetDestination.transform.position.z);
-        }
-
-        if (movableCinematicObjectController != null)
-        {
-            movableCinematicObjectController.HeadingDirection = targetDestination.transform.position - transform.position;
-            movableCinematicObjectController.AnimateMoves();
         }
             
         isMoving = true;

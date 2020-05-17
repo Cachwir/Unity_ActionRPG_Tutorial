@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerController : Movable, IPersistent
+public class PlayerController : SelfMovable, IPersistent
 {
     // INIT
     public string StartPoint { get; set; }
@@ -43,41 +43,42 @@ public class PlayerController : Movable, IPersistent
         animator.SetBool("isAttacking", IsAttacking);
     }
 
-    private void FixedUpdate()
+    protected new void FixedUpdate()
     {
         if (!IsInCinematicMode)
         {
             MovementsUpdate();
-            AttacksUpdate();
         }
+        
+        AttacksUpdate();
+        base.FixedUpdate();
     }
 
     protected void MovementsUpdate()
     {
-        this.IsMoving = false;
-        MoveInput = Vector2.zero;
+        Vector2 playerMovement = Vector2.zero;
 
-        if (!DialogManager.isReading && !AreMovementsRestrained && !IsPlayerRestrained && !IsAttacking)
+        if (!DialogManager.isReading && !AreMovementsRestrained && !IsImmobilized && !IsPlayerRestrained && !IsAttacking)
         {
-            MoveInput = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized;
+            playerMovement = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized;
         }
 
-        if (MoveInput != Vector2.zero)
+        if (playerMovement != Vector2.zero)
         {
-            thisRigidbody.velocity = new Vector2(MoveInput.x * moveSpeed, MoveInput.y * moveSpeed);
-            IsMoving = true;
-            LastMove = MoveInput;
+            selfMove = new Vector2(playerMovement.x * moveSpeed, playerMovement.y * moveSpeed);
+            isMovingSelf = true;
         }
         else
         {
-            thisRigidbody.velocity = Vector2.zero;
-            IsMoving = false;
+            StopMoving();
+            selfMove = Vector2.zero;
+            isMovingSelf = false;
         }
     }
 
     protected void AttacksUpdate()
     {
-        if (!DialogManager.isReading && !AreActionsRestrained && !IsPlayerRestrained && !IsAttacking)
+        if (!DialogManager.isReading && !IsInCinematicMode && !AreActionsRestrained && !IsPlayerRestrained && !IsAttacking)
         {
            if (Input.GetKeyDown(KeyCode.C))
             {

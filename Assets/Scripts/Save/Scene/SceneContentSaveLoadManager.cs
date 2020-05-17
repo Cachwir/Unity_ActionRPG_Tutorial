@@ -74,6 +74,7 @@ public class SceneContentSaveLoadManager : AbstractSaveLoadManager
                         movable.moveSpeed = movableData.moveSpeed;
                         movable.IsMoving = movableData.IsMoving;
                         movable.AreMovementsRestrained = movableData.AreMovementsRestrained;
+                        movable.IsImmobilized = movableData.IsImmobilized;
                         movable.IsInCinematicMode = movableData.IsInCinematicMode;
 
                         movable.LastMove = new Vector3
@@ -219,6 +220,7 @@ public class SceneContentSaveLoadManager : AbstractSaveLoadManager
             public bool IsMoving;
             public float[] LastMove = new float[3];
             public bool AreMovementsRestrained;
+            public bool IsImmobilized;
             public float[] MoveInput = new float[3];
             public bool IsInCinematicMode;
 
@@ -232,6 +234,7 @@ public class SceneContentSaveLoadManager : AbstractSaveLoadManager
                 LastMove[1] = movable.LastMove.y;
                 LastMove[2] = movable.LastMove.y;
                 AreMovementsRestrained = movable.AreMovementsRestrained;
+                IsImmobilized = movable.IsImmobilized;
                 MoveInput[0] = movable.MoveInput.x;
                 MoveInput[1] = movable.MoveInput.y;
                 MoveInput[2] = movable.MoveInput.y;

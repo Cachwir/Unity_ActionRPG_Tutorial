@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AutoMoving : Movable {
-
+public class AutoMoving : SelfMovable
+{
     public enum AutomoveDirectionType
     {
         ANY_DIRECTION,
@@ -24,9 +24,9 @@ public class AutoMoving : Movable {
     protected new void Start()
     {
         base.Start();
-
-        MoveTimeCounter = Random.Range(averageMoveTime * 0.75f, averageMoveTime * 1.25f);
-        TimeBetweenMovesCounter = Random.Range(betweenMovesAverageTime * 0.75f, betweenMovesAverageTime * 1.25f);
+        
+        MoveTimeCounter = Random.Range(averageMoveTime * (1 - averageMoveTimeDelta), averageMoveTime * (1 + averageMoveTimeDelta));
+        TimeBetweenMovesCounter = Random.Range(betweenMovesAverageTime * (1 - betweenMovesAverageTimeDelta), betweenMovesAverageTime * (1 + betweenMovesAverageTimeDelta));
 
         StartMovingRandomly();
     }
@@ -37,26 +37,23 @@ public class AutoMoving : Movable {
         base.Update();
 	}
 
-    protected void FixedUpdate()
+    protected new void FixedUpdate()
     {
         HandleMovesOnUpdate();
+        base.FixedUpdate();
     }
 
     public void HandleMovesOnUpdate()
     {
         if (CanMove)
         {
-            if (!IsInCinematicMode && IsMoving && AdditionalMovingConditions())
+            if (!IsInCinematicMode && isMovingSelf)
             {
-                MoveTimeCounter -= Time.fixedDeltaTime;
+                MoveTimeCounter -= Time.deltaTime;
 
-                if (AreMovementsRestrained)
+                if (!AreMovementsRestrained)
                 {
-                    thisRigidbody.velocity = Vector2.zero;
-                }
-                else
-                {
-                    thisRigidbody.velocity = LastMove;
+                    MoveCompiler.AddOrEditSelfMoveFactor(selfMove);
                 }
 
                 if (MoveTimeCounter <= 0)
@@ -66,7 +63,7 @@ public class AutoMoving : Movable {
             }
             else
             {
-                TimeBetweenMovesCounter -= Time.fixedDeltaTime;
+                TimeBetweenMovesCounter -= Time.deltaTime;
 
                 if (TimeBetweenMovesCounter <= 0)
                 {
@@ -76,36 +73,43 @@ public class AutoMoving : Movable {
         }
     }
 
-    protected virtual bool AdditionalMovingConditions()
+    public override bool ValidateMoveDirection(Vector3 velocity)
     {
-        return true;
+        return base.ValidateMoveDirection(velocity);
+    }
+
+    public void StartMoving()
+    {
+        StartMovingRandomly();
     }
 
     public void StartMovingRandomly()
     {
-        CanMove = true;
         StartWait();
+        CanMove = true;
     }
 
     public void InterruptMoving()
     {
         CanMove = false;
-        IsMoving = false;
-        thisRigidbody.velocity = Vector2.zero;
+        isMovingSelf = false;
+
+        MoveCompiler.RemoveSelfMoveFactor();
     }
 
     public void StartMove()
     {
         SetRandomMoveDirection();
         MoveTimeCounter = Random.Range(averageMoveTime * (1 - averageMoveTimeDelta), averageMoveTime * (1 + averageMoveTimeDelta));
-        IsMoving = true;
+        isMovingSelf = true;
     }
 
     public void StartWait()
     {
         TimeBetweenMovesCounter = Random.Range(betweenMovesAverageTime * (1 - betweenMovesAverageTimeDelta), betweenMovesAverageTime * (1 + betweenMovesAverageTimeDelta));
-        IsMoving = false;
-        thisRigidbody.velocity = Vector2.zero;
+        isMovingSelf = false;
+
+        MoveCompiler.RemoveSelfMoveFactor();
     }
 
     public void SetRandomMoveDirection()
@@ -124,8 +128,7 @@ public class AutoMoving : Movable {
 
     public void SetAnyDirectionRandomMoveDirection()
     {
-        LastMove = new Vector2(Random.Range(-1f, 1f) * moveSpeed / 2, Random.Range(-1f, 1f) * moveSpeed / 2);
-        MoveInput = LastMove;
+        selfMove = new Vector3(Random.Range(-1f, 1f) * moveSpeed / 2, Random.Range(-1f, 1f) * moveSpeed / 2, 0);
     }
 
     public void SetFourDirectionsRandomMoveDirection()
@@ -135,22 +138,20 @@ public class AutoMoving : Movable {
         switch (randomDirection)
         {
             case 0:
-                LastMove = new Vector2(0, moveSpeed / 2);
+                selfMove = new Vector3(0, moveSpeed / 2, 0);
                 break;
 
             case 1:
-                LastMove = new Vector2(moveSpeed / 2, 0);
+                selfMove = new Vector3(moveSpeed / 2, 0, 0);
                 break;
 
             case 2:
-                LastMove = new Vector2(0, -moveSpeed / 2);
+                selfMove = new Vector3(0, -moveSpeed / 2, 0);
                 break;
 
             case 3:
-                LastMove = new Vector2(-moveSpeed / 2, 0);
+                selfMove = new Vector3(-moveSpeed / 2, 0, 0);
                 break;
         }
-
-        MoveInput = LastMove;
     }
 }

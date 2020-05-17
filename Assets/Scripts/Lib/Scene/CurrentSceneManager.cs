@@ -5,12 +5,18 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+public class CurrentSceneManager : MonoBehaviour, ICustomSceneLoadHandler
+{
+    protected GameManager gameManager;
+    protected TransitionEffectManager transitionEffectManager;
 
-public class CurrentSceneManager : MonoBehaviour {
+    public Scene NextScene { get; set; }
 
-	// Use this for initialization
-	void Start () {
-
+    // Use this for initialization
+    void Start ()
+    {
+        gameManager = FindObjectOfType<GameManager>();
+        transitionEffectManager = FindObjectOfType<TransitionEffectManager>();
     }
 	
 	// Update is called once per frame
@@ -54,8 +60,40 @@ public class CurrentSceneManager : MonoBehaviour {
         return ennemies;
     }
 
-    public void LoadSceneFromId(int sceneId)
+    public void LoadSceneFromId(int sceneId, bool playBeforeTransition = false, bool playAfterTransition = false)
     {
-        SceneManager.LoadScene(sceneId);
+        LoadScene(sceneId, playBeforeTransition, playAfterTransition);
+    }
+
+    public void LoadSceneFromName(string sceneName, bool playBeforeTransition = false, bool playAfterTransition = false)
+    {
+        LoadScene(SceneUtility.GetBuildIndexByScenePath(Config.PATH_TO_SCENES + "/" + sceneName), playBeforeTransition, playAfterTransition);
+    }
+
+    public void LoadScene(int sceneBuildIndex, bool playBeforeTransition = false, bool playAfterTransition = false)
+    {
+        TransitionEffectManager_Callback loadSceneCall = delegate()
+        {
+            SceneManager.LoadScene(sceneBuildIndex);
+
+            if (playAfterTransition)
+            {
+                transitionEffectManager.PlayOutEffect(delegate () { });
+            }
+        };
+
+        if (playBeforeTransition)
+        {
+            transitionEffectManager.PlayInEffect(loadSceneCall);
+        }
+        else
+        {
+            loadSceneCall();
+        }
+    }
+
+    public void SceneSaveLoadManager_LoadSceneFromId(int sceneId)
+    {
+        LoadSceneFromId(sceneId, true, true);
     }
 }

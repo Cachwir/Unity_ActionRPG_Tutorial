@@ -5,17 +5,20 @@ using UnityEngine;
 public class HurtEnnemy : MonoBehaviour {
 
     public int baseDamageAmount;
+    public string hitSfx;
     public GameObject hurtEffect;
     public GameObject hitPoint;
     public GameObject damageNumberText;
 
     protected GameObject player;
     protected PlayerStats playerStats;
+    protected SFXController sfxController;
 
     // Use this for initialization
     void Start () {
         player = this.transform.parent.gameObject;
         playerStats = FindObjectOfType<PlayerStats>();
+        sfxController = FindObjectOfType<SFXController>();
     }
 	
 	// Update is called once per frame
@@ -35,6 +38,7 @@ public class HurtEnnemy : MonoBehaviour {
     public void PlayHurtEffect(EnnemyHealthManager ennemyHealthManager, int damageAmount)
     {
         Instantiate(hurtEffect, hitPoint.transform.position, hitPoint.transform.rotation);
+        sfxController.PlaySoundEffect(hitSfx);
 
         var damageNumberTextClone = (GameObject) Instantiate(damageNumberText, hitPoint.transform.position, Quaternion.Euler(Vector3.zero));
         damageNumberTextClone.GetComponent<FloatingText>().text = "" + damageAmount;

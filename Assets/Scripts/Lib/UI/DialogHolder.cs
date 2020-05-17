@@ -65,6 +65,7 @@ public class DialogHolder : MonoBehaviour {
             if (!isChained)
             {
                 playerController.UnrestrainPlayer();
+                playerController.Unimmobilize();
             }
             
             if (hasNpcMovementManager)
@@ -81,6 +82,7 @@ public class DialogHolder : MonoBehaviour {
         if (!isChained)
         {
             playerController.RestrainPlayer();
+            playerController.Immobilize();
         }
            
         dialogManager.OpenDialog(dialog, onDialogClose);

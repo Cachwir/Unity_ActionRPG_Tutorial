@@ -28,6 +28,7 @@ public class PlayerSaveLoadManager : AbstractSaveLoadManager
             {
                 currentPlayerController.LastMove = new Vector2(playerData.playerControllerData.lastMove[0], playerData.playerControllerData.lastMove[1]);
                 currentPlayerController.AreMovementsRestrained = playerData.playerControllerData.AreMovementsRestrained;
+                currentPlayerController.IsImmobilized = playerData.playerControllerData.IsImmobilized;
                 currentPlayerController.IsInCinematicMode = playerData.playerControllerData.IsInCinematicMode;
                 currentPlayerController.AreActionsRestrained = playerData.playerControllerData.AreActionsRestrained;
                 currentPlayerController.IsPlayerRestrained = playerData.playerControllerData.IsPlayerRestrained;
@@ -61,6 +62,7 @@ public class PlayerSaveLoadManager : AbstractSaveLoadManager
             public float[] lastMove = new float[2];
             
             public bool AreMovementsRestrained;
+            public bool IsImmobilized;
             public bool IsInCinematicMode;
             public bool AreActionsRestrained;
             public bool IsPlayerRestrained;
@@ -71,6 +73,7 @@ public class PlayerSaveLoadManager : AbstractSaveLoadManager
                 lastMove[1] = playerController.LastMove.y;
                 
                 AreMovementsRestrained = playerController.AreMovementsRestrained;
+                IsImmobilized = playerController.IsImmobilized;
                 IsInCinematicMode = playerController.IsInCinematicMode;
                 AreActionsRestrained = playerController.AreActionsRestrained;
                 IsPlayerRestrained = playerController.IsPlayerRestrained;

@@ -7,12 +7,13 @@ public class KeyEventController : MonoBehaviour
     protected float keyPressResetTime = 0.5f;
     protected float dialogSpamPreventingTimeCounter;
 
+    protected List<KeyCode> watchedKeyCodes;
     protected Dictionary<KeyCode, bool> pressedKeys = new Dictionary<KeyCode, bool>(); // the bool represents if the pressedKey is available for use
 
     // Use this for initialization
     protected void Start()
     {
-       
+        watchedKeyCodes = new List<KeyCode>();
     }
 
     // Update is called once per frame
@@ -21,22 +22,31 @@ public class KeyEventController : MonoBehaviour
         HandleKeyPressEvents();
     }
 
+    public void WatchKeyCode(KeyCode keyCode)
+    {
+        if (!watchedKeyCodes.Contains(keyCode))
+        {
+            watchedKeyCodes.Add(keyCode);
+        }
+    }
+
     protected void HandleKeyPressEvents()
     {
-        KeyCode spaceKeyCode = KeyCode.Space;
-
-        if (Input.GetKeyDown(spaceKeyCode))
+        foreach (KeyCode keyCode in watchedKeyCodes)
         {
-            if (!pressedKeys.ContainsKey(spaceKeyCode))
+            if (Input.GetKeyDown(keyCode))
             {
-                pressedKeys.Add(spaceKeyCode, true);
-                StartCoroutine(KeyPressResetTimer(spaceKeyCode));
+                if (!pressedKeys.ContainsKey(keyCode))
+                {
+                    pressedKeys.Add(keyCode, true);
+                    StartCoroutine(KeyPressResetTimer(keyCode));
+                }
             }
-        }
 
-        if (Input.GetKeyUp(spaceKeyCode))
-        {
-            pressedKeys.Remove(spaceKeyCode);
+            if (Input.GetKeyUp(keyCode))
+            {
+                pressedKeys.Remove(keyCode);
+            }
         }
     }
     

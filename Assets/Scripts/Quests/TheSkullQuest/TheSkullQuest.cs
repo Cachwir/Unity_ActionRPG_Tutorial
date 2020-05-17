@@ -34,10 +34,12 @@ public class TheSkullQuest : Quest {
     {
         dialogHolder.transform.parent.gameObject.SetActive(false);
         playerController.RestrainPlayer();
+        playerController.Immobilize();
         StartCoroutine(Wait(2, delegate ()
         {
             dialogHolder.StartDialog(new List<string>() { "...", "(On dirait qu'il a oublié pour la récompense)" }, delegate() {
                 playerController.UnrestrainPlayer();
+                playerController.Unimmobilize();
                 EndQuestWithSuccess();
             });
         }));

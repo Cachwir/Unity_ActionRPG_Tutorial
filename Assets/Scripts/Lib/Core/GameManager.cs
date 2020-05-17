@@ -26,15 +26,18 @@ public class GameManager : MonoBehaviour, IPersistent
 		
 	}
 
-    public void PauseGame(bool discreet = false)
+    public void PauseGame()
     {
-        // TODO : if not descreet, display a "pause" texts
         Time.timeScale = 0;
     }
 
     public void UnpauseGame()
     {
-        // TODO : remove the "pause" text
         Time.timeScale = 1;
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
     }
 }

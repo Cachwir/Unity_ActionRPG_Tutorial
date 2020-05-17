@@ -48,12 +48,12 @@ public class CinematicsManager : MonoBehaviour, IGameLoadListener
 
     public void PausePlayerActions()
     {
-        playerController.RestrainPlayer();
+        playerController.EnterCinematicMode();
     }
 
     public void ResumePlayerActions()
     {
-        playerController.UnrestrainPlayer();
+        playerController.LeaveCinematicMode();
     }
 
     public void ForceEndCinematics()
